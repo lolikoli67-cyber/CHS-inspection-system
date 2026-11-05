@@ -446,7 +446,7 @@ function App() {
           <footer style={styles.footer}>
             CHS Quality Inspection Schedule System<br />
             <span style={{ fontSize: '0.75rem', opacity: 0.6, display: 'inline-block', marginTop: '4px' }}>
-              Developed by HSK
+              Developed by EJ.Lee
             </span>
           </footer>
         </div>
