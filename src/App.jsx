@@ -1,8 +1,57 @@
+import { supabase } from './supabaseClient'
 import React, { useState, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 
 function App() {
   const [isEntered, setIsEntered] = useState(false);
+
+const [events, setEvents] = useState([]);
+
+  // 1. 일정 불러오기
+  useEffect(() => {
+    fetchSchedules();
+  }, []);
+
+  const fetchSchedules = async () => {
+    const { data, error } = await supabase
+      .from('schedule_events')
+      .select('*')
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('일정 불러오기 실패:', error);
+    } else {
+      setEvents(data);
+    }
+  };
+
+  // 2. 새 일정 추가하기
+  const handleAddEvent = async (newEventData) => {
+    const { error } = await supabase
+      .from('schedule_events')
+      .insert([newEventData]);
+
+    if (error) {
+      alert('저장 실패: ' + error.message);
+    } else {
+      fetchSchedules();
+    }
+  };
+
+  // 3. 일정 삭제하기
+  const handleDeleteEvent = async (id) => {
+    const { error } = await supabase
+      .from('schedule_events')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      alert('삭제 실패');
+    } else {
+      fetchSchedules();
+    }
+  };
+  
   const [currentTab, setCurrentTab] = useState('register');
 
   const [selectedVendor, setSelectedVendor] = useState('전체');
