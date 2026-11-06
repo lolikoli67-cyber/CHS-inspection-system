@@ -440,7 +440,7 @@ const handleAddEvent = async (newEventData) => {
     setShowEditModal(true);
   };
 
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     if (!project || !shipNo || !item || !date) {
       alert('모든 항목을 입력해 주세요.');
@@ -1072,5 +1072,5 @@ const styles = {
   cancelBtn: { padding: '8px 16px', border: 'none', backgroundColor: '#f3f4f6', color: '#4b5563', borderRadius: '6px', cursor: 'pointer' },
   submitBtn: { padding: '8px 18px', border: 'none', backgroundColor: '#1b4332', color: '#fff', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' },
 };
-
+};
 export default App;
