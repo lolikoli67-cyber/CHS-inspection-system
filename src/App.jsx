@@ -25,18 +25,29 @@ const [events, setEvents] = useState([]);
     }
   };
 
-  // 2. 새 일정 추가하기
-  const handleAddEvent = async (newEventData) => {
-    const { error } = await supabase
-      .from('schedule_events')
-      .insert([newEventData]);
+ // 2. 새 일정 추가하기
+const handleAddEvent = async (newEventData) => {
+  // Form 입력 객체와 DB 컬럼명을 명확히 매핑하여 전달
+  const { error } = await supabase
+    .from('schedule_events')
+    .insert([{
+      date: newEventData.date,
+      vendor: newEventData.vendor,
+      hull_no: newEventData.hull_no || newEventData.hullNo,
+      block: newEventData.block,
+      item: newEventData.item,
+      time: newEventData.time,
+      location: newEventData.location,
+      notes: newEventData.notes
+    }]);
 
-    if (error) {
-      alert('저장 실패: ' + error.message);
-    } else {
-      fetchSchedules();
-    }
-  };
+  if (error) {
+    console.error('DB 저장 에러:', error);
+    alert('저장 실패: ' + error.message);
+  } else {
+    fetchSchedules();
+  }
+};
 
   // 3. 일정 삭제하기
   const handleDeleteEvent = async (id) => {
@@ -165,9 +176,7 @@ const [events, setEvents] = useState([]);
     ];
   });
 
-  useEffect(() => {
-    localStorage.setItem('chs_inspections', JSON.stringify(inspections));
-  }, [inspections]);
+
 
   const getWeekDays = (startDate) => {
     const days = [];
@@ -447,11 +456,23 @@ const [events, setEvents] = useState([]);
       date,
     };
 
-    setInspections([...inspections, newInspection]);
+    // Supabase DB에 저장 함수 호출 (shipNo -> hull_no, project -> block 매핑)
+    await handleAddEvent({
+      date: newInspection.date,
+      vendor: newInspection.vendor,
+      hull_no: newInspection.shipNo,   // 호선 번호 매핑
+      block: newInspection.project,   // 프로젝트/블록 매핑
+      item: newInspection.item,
+      time: newInspection.time || '', // 시간이 있다면 추가
+      location: newInspection.location || '', // 장소가 있다면 추가
+      notes: newInspection.notes || ''        // 비고가 있다면 추가
+    });
+
     setShowRegisterModal(false);
-    setProject(''); setShipNo(''); setItem('');
-    alert('검사 일정이 성공적으로 등록되었습니다.');
-  };
+    setProject(''); 
+    setShipNo(''); 
+    setItem('');
+    // alert 코드는 handleAddEvent 안이나 이곳에 두시면 됩니다.
 
   const handleEditSubmit = (e) => {
     e.preventDefault();
