@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 
 function App() {
-  // 새로고침 시에도 대문자 화면으로 돌아가지 않도록 localStorage 연동
   const [isEntered, setIsEntered] = useState(() => {
     return localStorage.getItem('chs_is_entered') === 'true';
   });
@@ -124,11 +123,10 @@ function App() {
 
   const [date, setDate] = useState(getTodayStr());
 
-  // 오늘 날짜(2026-11-09 등)를 기준으로 이번 주 월요일을 계산하여 첫 화면에 표시
   const getThisWeekMonday = () => {
     const d = new Date();
     const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // 월요일 기준
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
     return new Date(d.setDate(diff));
   };
 
@@ -166,7 +164,6 @@ function App() {
 
   const tkOptions = ['TK1', 'TK2', 'TK3', 'TK4'];
 
-  // 요청하신 검사 항목 목록 반영 (insp. 제거 및 항목 추가/삭제)
   const items = [
     'Liquid dome cover',
     'Gas dome',
@@ -213,6 +210,7 @@ function App() {
 
   const weekRangeText = `${weekDays[0].dateStr.slice(5).replace('-', '/')} ~ ${weekDays[6].dateStr.slice(5).replace('-', '/')}`;
 
+  // 엑셀 다운로드 셀 텍스트 순서 변경: 호선 / 아이템 / TK 넘버 순서
   const handleExcelDownload = () => {
     const activeProjects = ['All Projects', ...new Set(inspections.map(i => i.project))];
     let workbookXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -302,7 +300,8 @@ function App() {
           });
 
           if (matches.length > 0) {
-            const cellText = matches.map(m => `${m.shipNo} ${m.tkNo ? `(TK No.: ${m.tkNo}) ` : ''}${m.item}`).join('\n');
+            // 호선 / 아이템 / TK 넘버 순서로 조합
+            const cellText = matches.map(m => `${m.shipNo} ${m.item} ${m.tkNo ? `(TK No.: ${m.tkNo})` : ''}`).join('\n');
             const safeKey = vendor.replace(/[^a-zA-Z0-9]/g, '_');
             workbookXml += `<Cell ss:StyleID="DataStyle_${safeKey}"><Data ss:Type="String">${cellText}</Data></Cell>`;
           } else {
