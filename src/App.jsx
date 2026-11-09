@@ -1,11 +1,10 @@
-import { supabase } from './supabaseClient'
+import { supabase } from './supabaseClient';
 import React, { useState, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 
 function App() {
   const [isEntered, setIsEntered] = useState(false);
-
-const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState([]);
 
   // 1. 일정 불러오기
   useEffect(() => {
@@ -25,29 +24,28 @@ const [events, setEvents] = useState([]);
     }
   };
 
- // 2. 새 일정 추가하기
-const handleAddEvent = async (newEventData) => {
-  // Form 입력 객체와 DB 컬럼명을 명확히 매핑하여 전달
-  const { error } = await supabase
-    .from('schedule_events')
-    .insert([{
-      date: newEventData.date,
-      vendor: newEventData.vendor,
-      hull_no: newEventData.hull_no || newEventData.hullNo,
-      block: newEventData.block,
-      item: newEventData.item,
-      time: newEventData.time,
-      location: newEventData.location,
-      notes: newEventData.notes
-    }]);
+  // 2. 새 일정 추가하기
+  const handleAddEvent = async (newEventData) => {
+    const { error } = await supabase
+      .from('schedule_events')
+      .insert([{
+        date: newEventData.date,
+        vendor: newEventData.vendor,
+        hull_no: newEventData.hull_no || newEventData.hullNo,
+        block: newEventData.block,
+        item: newEventData.item,
+        time: newEventData.time,
+        location: newEventData.location,
+        notes: newEventData.notes
+      }]);
 
-  if (error) {
-    console.error('DB 저장 에러:', error);
-    alert('저장 실패: ' + error.message);
-  } else {
-    fetchSchedules();
-  }
-};
+    if (error) {
+      console.error('DB 저장 에러:', error);
+      alert('저장 실패: ' + error.message);
+    } else {
+      fetchSchedules();
+    }
+  };
 
   // 3. 일정 삭제하기
   const handleDeleteEvent = async (id) => {
@@ -64,7 +62,6 @@ const handleAddEvent = async (newEventData) => {
   };
   
   const [currentTab, setCurrentTab] = useState('register');
-
   const [selectedVendor, setSelectedVendor] = useState('전체');
   const [selectedProjectFilter, setSelectedProjectFilter] = useState('전체');
   const [showVendorModal, setShowVendorModal] = useState(false);
@@ -72,7 +69,6 @@ const handleAddEvent = async (newEventData) => {
   const [showEditModal, setShowEditModal] = useState(false);
   
   const [activeVendor, setActiveVendor] = useState('');
-
   const [editId, setEditId] = useState(null);
   const [project, setProject] = useState('');
   const [shipNo, setShipNo] = useState('');
@@ -89,7 +85,6 @@ const handleAddEvent = async (newEventData) => {
   const [date, setDate] = useState(getTodayStr());
   const [currentWeekStart, setCurrentWeekStart] = useState(new Date('2026-11-02'));
 
-  // 정식 협력사 명칭 명확한 단일 통일
   const vendors = [
     'DONGWON INDUSTRY',
     'KANGNAM MACHINE INDUSTRY',
@@ -111,19 +106,8 @@ const handleAddEvent = async (newEventData) => {
   };
 
   const projects = [
-    'NAKILAT',
-    'NYK',
-    'EVALEND',
-    'CMA CGM',
-    'RELIANCE',
-    'DYNAGAS',
-    'MOL',
-    'NYK VLAC',
-    'PRUS MARINE',
-    'RELIANCE SOLVANG',
-    'YANG MING ONE',
-    'PANTHEON',
-    'PRIMAVERA'
+    'NAKILAT', 'NYK', 'EVALEND', 'CMA CGM', 'RELIANCE', 'DYNAGAS', 'MOL', 
+    'NYK VLAC', 'PRUS MARINE', 'RELIANCE SOLVANG', 'YANG MING ONE', 'PANTHEON', 'PRIMAVERA'
   ];
 
   const shipNumbers = [
@@ -137,17 +121,9 @@ const handleAddEvent = async (newEventData) => {
   ];
 
   const items = [
-    'Liquid dome cover insp.',
-    'Gas dome insp.',
-    'Gas dome internal insp.',
-    'Liquid dome coaming insp.',
-    'Pump tower base plate insp.',
-    'Pump tower base support insp.',
-    'Helium Leak test',
-    'Sump well',
-    'Sump well block',
-    'Insulation insp.',
-    'Bonding insp.'
+    'Liquid dome cover insp.', 'Gas dome insp.', 'Gas dome internal insp.', 
+    'Liquid dome coaming insp.', 'Pump tower base plate insp.', 'Pump tower base support insp.', 
+    'Helium Leak test', 'Sump well', 'Sump well block', 'Insulation insp.', 'Bonding insp.'
   ];
 
   const [inspections, setInspections] = useState(() => {
@@ -155,7 +131,6 @@ const handleAddEvent = async (newEventData) => {
     if (saved) {
       try { 
         const parsed = JSON.parse(saved);
-        // 저장된 데이터도 읽어올 때 정식 명칭으로 명확하게 매핑
         return parsed.map(ins => {
           let v = ins.vendor;
           if (v.includes('DongWon') || v.includes('DONGWON')) v = 'DONGWON INDUSTRY';
@@ -176,26 +151,17 @@ const handleAddEvent = async (newEventData) => {
     ];
   });
 
-
-
   const getWeekDays = (startDate) => {
     const days = [];
     for (let i = 0; i < 7; i++) {
       const d = new Date(startDate);
       d.setDate(d.getDate() + i);
-      
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, '0');
       const day = String(d.getDate()).padStart(2, '0');
       const dateStr = `${year}-${month}-${day}`;
-      
       const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      days.push({
-        dayName: dayNames[i],
-        dateStr,
-        dayNum: d.getDate(),
-        isWeekend: i >= 5
-      });
+      days.push({ dayName: dayNames[i], dateStr, dayNum: d.getDate(), isWeekend: i >= 5 });
     }
     return days;
   };
@@ -216,10 +182,8 @@ const handleAddEvent = async (newEventData) => {
 
   const weekRangeText = `${weekDays[0].dateStr.slice(5).replace('-', '/')} ~ ${weekDays[6].dateStr.slice(5).replace('-', '/')}`;
 
-  // 엑셀 다운로드 함수
   const handleExcelDownload = () => {
     const activeProjects = ['All Projects', ...new Set(inspections.map(i => i.project))];
-
     let workbookXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
       <?mso-application progid="Excel.Sheet"?>
       <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
@@ -230,65 +194,29 @@ const handleAddEvent = async (newEventData) => {
       <Styles>
         <Style ss:ID="TitleStyle">
           <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
-          <Borders>
-            <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#006100"/>
-            <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#006100"/>
-            <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#006100"/>
-            <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#006100"/>
-          </Borders>
           <Interior ss:Color="#E2EFDA" ss:Pattern="Solid"/>
           <Font ss:FontName="Arial" ss:Size="16" ss:Bold="1" ss:Color="#006100"/>
         </Style>
-        
         <Style ss:ID="SubTitleStyle">
           <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
           <Font ss:FontName="Arial" ss:Size="10" ss:Color="#333333"/>
         </Style>
-
         <Style ss:ID="HeaderStyle">
           <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
-          <Borders>
-            <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>
-            <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>
-            <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>
-            <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>
-          </Borders>
           <Interior ss:Color="#1B4332" ss:Pattern="Solid"/>
           <Font ss:FontName="Arial" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/>
         </Style>
-
         <Style ss:ID="WeekendHeaderStyle">
           <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
-          <Borders>
-            <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>
-            <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>
-            <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>
-            <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>
-          </Borders>
           <Interior ss:Color="#6E2C22" ss:Pattern="Solid"/>
           <Font ss:FontName="Arial" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/>
         </Style>
-
         <Style ss:ID="VendorStyle">
           <Alignment ss:Horizontal="Left" ss:Vertical="Center"/>
-          <Borders>
-            <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
-            <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
-            <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
-            <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
-          </Borders>
-          <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
           <Font ss:FontName="Arial" ss:Size="10" ss:Bold="1" ss:Color="#1B4332"/>
         </Style>
-
         <Style ss:ID="EmptyDataStyle">
           <Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/>
-          <Borders>
-            <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
-            <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
-            <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
-            <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
-          </Borders>
           <Font ss:FontName="Arial" ss:Size="9" ss:Color="#333333"/>
         </Style>`;
 
@@ -298,12 +226,6 @@ const handleAddEvent = async (newEventData) => {
       workbookXml += `
         <Style ss:ID="DataStyle_${safeKey}">
           <Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/>
-          <Borders>
-            <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
-            <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
-            <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
-            <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
-          </Borders>
           <Interior ss:Color="${hexColor}" ss:Pattern="Solid"/>
           <Font ss:FontName="Arial" ss:Size="9" ss:Bold="1" ss:Color="#111827"/>
         </Style>`;
@@ -321,15 +243,12 @@ const handleAddEvent = async (newEventData) => {
         <Table ss:DefaultColumnWidth="120" ss:DefaultRowHeight="20">
           <Column ss:Width="180"/>
           ${weekDays.map(() => '<Column ss:Width="160"/>').join('')}
-          
           <Row ss:Height="35">
             <Cell ss:MergeAcross="7" ss:StyleID="TitleStyle"><Data ss:Type="String">Weekly Inspection Schedule — ${proj}</Data></Cell>
           </Row>
-          
           <Row ss:Height="22">
             <Cell ss:MergeAcross="7" ss:StyleID="SubTitleStyle"><Data ss:Type="String">Weekly Schedule   ${weekRangeText}</Data></Cell>
           </Row>
-
           <Row ss:Height="28">
             <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Subcontractor</Data></Cell>`;
 
@@ -359,13 +278,10 @@ const handleAddEvent = async (newEventData) => {
             workbookXml += `<Cell ss:StyleID="EmptyDataStyle"><Data ss:Type="String"></Data></Cell>`;
           }
         });
-
         workbookXml += `</Row>`;
       });
 
-      workbookXml += `
-        </Table>
-      </Worksheet>`;
+      workbookXml += `</Table></Worksheet>`;
     });
 
     workbookXml += `</Workbook>`;
@@ -393,20 +309,12 @@ const handleAddEvent = async (newEventData) => {
         <html>
           <head>
             <title>Weekly Inspection Schedule - PDF</title>
-            <style>
-              body { font-family: 'Segoe UI', sans-serif; margin: 20px; text-align: center; }
-              img { max-width: 100%; height: auto; }
-            </style>
+            <style>body { font-family: 'Segoe UI', sans-serif; margin: 20px; text-align: center; } img { max-width: 100%; height: auto; }</style>
           </head>
           <body>
             <h2 style="color: #1b4332;">Weekly Inspection Schedule</h2>
             <img src="${imgData}" />
-            <script>
-              setTimeout(() => {
-                window.print();
-                window.close();
-              }, 500);
-            </script>
+            <script>setTimeout(() => { window.print(); window.close(); }, 500);</script>
           </body>
         </html>
       `);
@@ -431,7 +339,6 @@ const handleAddEvent = async (newEventData) => {
       alert('본인 협력사 데이터만 수정할 수 있습니다.');
       return;
     }
-
     setEditId(itemData.id);
     setProject(itemData.project);
     setShipNo(itemData.shipNo);
@@ -456,23 +363,22 @@ const handleAddEvent = async (newEventData) => {
       date,
     };
 
-    // Supabase DB에 저장 함수 호출 (shipNo -> hull_no, project -> block 매핑)
     await handleAddEvent({
       date: newInspection.date,
       vendor: newInspection.vendor,
-      hull_no: newInspection.shipNo,   // 호선 번호 매핑
-      block: newInspection.project,   // 프로젝트/블록 매핑
+      hull_no: newInspection.shipNo,
+      block: newInspection.project,
       item: newInspection.item,
-      time: newInspection.time || '', // 시간이 있다면 추가
-      location: newInspection.location || '', // 장소가 있다면 추가
-      notes: newInspection.notes || ''        // 비고가 있다면 추가
+      time: newInspection.time || '',
+      location: newInspection.location || '',
+      notes: newInspection.notes || ''
     });
 
     setShowRegisterModal(false);
     setProject(''); 
     setShipNo(''); 
     setItem('');
-    // alert 코드는 handleAddEvent 안이나 이곳에 두시면 됩니다.
+  }; // <--- [정상 닫힘]
 
   const handleEditSubmit = (e) => {
     e.preventDefault();
@@ -525,20 +431,10 @@ const handleAddEvent = async (newEventData) => {
   }
 
   const currentWeekDateStrs = weekDays.map(w => w.dateStr);
-
-  const filteredInspections = selectedVendor === '전체'
-    ? inspections
-    : inspections.filter((ins) => ins.vendor === selectedVendor);
-
+  const filteredInspections = selectedVendor === '전체' ? inspections : inspections.filter((ins) => ins.vendor === selectedVendor);
   const weekInspections = filteredInspections.filter(ins => currentWeekDateStrs.includes(ins.date));
-
-  const adminFilteredInspections = selectedProjectFilter === '전체'
-    ? inspections.filter(ins => currentWeekDateStrs.includes(ins.date))
-    : inspections.filter(ins => currentWeekDateStrs.includes(ins.date) && ins.project === selectedProjectFilter);
-
-  const progressBaseInspections = selectedProjectFilter === '전체'
-    ? inspections.filter(ins => currentWeekDateStrs.includes(ins.date))
-    : inspections.filter(ins => currentWeekDateStrs.includes(ins.date) && ins.project === selectedProjectFilter);
+  const adminFilteredInspections = selectedProjectFilter === '전체' ? inspections.filter(ins => currentWeekDateStrs.includes(ins.date)) : inspections.filter(ins => currentWeekDateStrs.includes(ins.date) && ins.project === selectedProjectFilter);
+  const progressBaseInspections = adminFilteredInspections;
 
   return (
     <div style={styles.mainLayout}>
@@ -552,21 +448,13 @@ const handleAddEvent = async (newEventData) => {
           </div>
           <nav style={styles.navMenu}>
             <div 
-              style={{ 
-                ...styles.navItem, 
-                backgroundColor: currentTab === 'register' ? 'rgba(255, 255, 255, 0.15)' : 'transparent', 
-                fontWeight: currentTab === 'register' ? 'bold' : 'normal' 
-              }}
+              style={{ ...styles.navItem, backgroundColor: currentTab === 'register' ? 'rgba(255, 255, 255, 0.15)' : 'transparent', fontWeight: currentTab === 'register' ? 'bold' : 'normal' }}
               onClick={() => setCurrentTab('register')}
             >
               📋 검사 등록/조회
             </div>
             <div 
-              style={{ 
-                ...styles.navItem, 
-                backgroundColor: currentTab === 'admin' ? 'rgba(255, 255, 255, 0.15)' : 'transparent', 
-                fontWeight: currentTab === 'admin' ? 'bold' : 'normal' 
-              }}
+              style={{ ...styles.navItem, backgroundColor: currentTab === 'admin' ? 'rgba(255, 255, 255, 0.15)' : 'transparent', fontWeight: currentTab === 'admin' ? 'bold' : 'normal' }}
               onClick={() => setCurrentTab('admin')}
             >
               📊 관리자 현황판
@@ -609,10 +497,7 @@ const handleAddEvent = async (newEventData) => {
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '550px', overflowY: 'auto' }}>
                   <li 
                     style={{ 
-                      fontSize: '0.85rem', 
-                      cursor: 'pointer', 
-                      padding: '6px 8px', 
-                      borderRadius: '4px',
+                      fontSize: '0.85rem', cursor: 'pointer', padding: '6px 8px', borderRadius: '4px',
                       backgroundColor: selectedVendor === '전체' ? '#f0fdf4' : 'transparent',
                       fontWeight: selectedVendor === '전체' ? 'bold' : 'normal', 
                       color: selectedVendor === '전체' ? '#1b4332' : '#4b5563' 
@@ -628,16 +513,11 @@ const handleAddEvent = async (newEventData) => {
                       <li 
                         key={v} 
                         style={{ 
-                          fontSize: '0.8rem', 
-                          cursor: 'pointer', 
-                          padding: '6px 8px', 
-                          borderRadius: '4px',
+                          fontSize: '0.8rem', cursor: 'pointer', padding: '6px 8px', borderRadius: '4px',
                           backgroundColor: isSelected ? '#f0fdf4' : 'transparent',
                           fontWeight: isSelected ? 'bold' : 'normal', 
                           color: isSelected ? '#1b4332' : '#4b5563',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px'
+                          display: 'flex', alignItems: 'center', gap: '8px'
                         }}
                         onClick={() => setSelectedVendor(v)}
                       >
@@ -757,10 +637,7 @@ const handleAddEvent = async (newEventData) => {
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '550px', overflowY: 'auto' }}>
                   <li 
                     style={{ 
-                      fontSize: '0.85rem', 
-                      cursor: 'pointer', 
-                      padding: '6px 8px', 
-                      borderRadius: '4px',
+                      fontSize: '0.85rem', cursor: 'pointer', padding: '6px 8px', borderRadius: '4px',
                       backgroundColor: selectedProjectFilter === '전체' ? '#f0fdf4' : 'transparent',
                       fontWeight: selectedProjectFilter === '전체' ? 'bold' : 'normal', 
                       color: selectedProjectFilter === '전체' ? '#1b4332' : '#555' 
@@ -775,10 +652,7 @@ const handleAddEvent = async (newEventData) => {
                       <li 
                         key={p} 
                         style={{ 
-                          fontSize: '0.83rem', 
-                          cursor: 'pointer', 
-                          padding: '6px 8px', 
-                          borderRadius: '4px',
+                          fontSize: '0.83rem', cursor: 'pointer', padding: '6px 8px', borderRadius: '4px',
                           backgroundColor: isSelected ? '#f0fdf4' : 'transparent',
                           fontWeight: isSelected ? 'bold' : 'normal', 
                           color: isSelected ? '#1b4332' : '#555' 
@@ -820,15 +694,7 @@ const handleAddEvent = async (newEventData) => {
                             <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: count > 0 ? '#1b4332' : '#9ca3af' }}>{count}건</span>
                           </div>
                           <div style={{ width: '100%', height: '6px', backgroundColor: '#e5e7eb', borderRadius: '3px', overflow: 'hidden' }}>
-                            <div 
-                              style={{ 
-                                height: '100%', 
-                                width: `${percent}%`, 
-                                backgroundColor: brandColor, 
-                                borderRadius: '3px',
-                                transition: 'width 0.4s ease-in-out' 
-                              }}
-                            />
+                            <div style={{ height: '100%', width: `${percent}%`, backgroundColor: brandColor, borderRadius: '3px', transition: 'width 0.4s ease-in-out' }} />
                           </div>
                         </div>
                       );
@@ -1024,9 +890,6 @@ const styles = {
 
   bodyGrid: { display: 'flex', gap: '16px', flex: 1 },
   vendorPanel: { width: '200px', backgroundColor: '#fff', borderRadius: '8px', padding: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', height: 'fit-content' },
-  vendorPanelTitle: { margin: '0 0 12px 0', fontSize: '0.95rem', color: '#1b4332', borderBottom: '2px solid #1b4332', paddingBottom: '6px' },
-  vendorList: { listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' },
-  vendorItem: { fontSize: '0.85rem', cursor: 'pointer', padding: '4px 0', display: 'flex', alignItems: 'center' },
 
   adminStatsRow: { display: 'flex', gap: '16px' },
   statCard: { backgroundColor: '#fff', borderRadius: '8px', padding: '16px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' },
@@ -1034,9 +897,6 @@ const styles = {
   statLabel: { fontSize: '0.85rem', color: '#6b7280', marginTop: '4px' },
 
   progressCard: { backgroundColor: '#fff', borderRadius: '8px', padding: '16px 20px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' },
-  progressBarBg: { width: '100%', height: '10px', backgroundColor: '#e5e7eb', borderRadius: '5px', overflow: 'hidden' },
-  progressBarFill: { height: '100%', borderRadius: '5px', transition: 'width 0.3s ease' },
-
   noticeBar: { backgroundColor: '#fffbe8', border: '1px solid #fef3c7', padding: '12px 16px', borderRadius: '8px', fontSize: '0.88rem' },
   calendarCard: { backgroundColor: '#fff', borderRadius: '8px', padding: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', minHeight: '380px' },
   weekHeader: { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' },
@@ -1072,5 +932,5 @@ const styles = {
   cancelBtn: { padding: '8px 16px', border: 'none', backgroundColor: '#f3f4f6', color: '#4b5563', borderRadius: '6px', cursor: 'pointer' },
   submitBtn: { padding: '8px 18px', border: 'none', backgroundColor: '#1b4332', color: '#fff', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' },
 };
-};
+
 export default App;
