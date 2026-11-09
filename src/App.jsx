@@ -6,7 +6,6 @@ function App() {
   const [isEntered, setIsEntered] = useState(false);
   const [events, setEvents] = useState([]);
 
-  // 1. Supabase 일정 불러오기
   useEffect(() => {
     fetchSchedules();
   }, []);
@@ -24,7 +23,6 @@ function App() {
     }
   };
 
-  // Supabase DB 데이터 -> 화면 사용 객체 매핑
   const inspections = events.map(ev => ({
     id: ev.id,
     vendor: ev.vendor || '',
@@ -35,7 +33,6 @@ function App() {
     date: ev.date || '',
   }));
 
-  // 2. 새 일정 추가 (Supabase 저장 후 즉시 목록 갱신)
   const handleAddEvent = async (newEventData) => {
     const { error } = await supabase
       .from('schedule_events')
@@ -46,6 +43,7 @@ function App() {
         block: newEventData.project,
         TK_NO: newEventData.tkNo,
         item: newEventData.item,
+        time: '', // not null 제약 방지용 빈값
       }]);
 
     if (error) {
@@ -56,7 +54,6 @@ function App() {
     }
   };
 
-  // 3. 일정 수정
   const handleUpdateEvent = async (id, updatedData) => {
     const { error } = await supabase
       .from('schedule_events')
@@ -78,7 +75,6 @@ function App() {
     }
   };
 
-  // 4. 일정 삭제
   const handleDeleteEvent = async (id) => {
     const { error } = await supabase
       .from('schedule_events')
@@ -118,13 +114,8 @@ function App() {
   const [currentWeekStart, setCurrentWeekStart] = useState(new Date('2026-11-02'));
 
   const vendors = [
-    'DONGWON INDUSTRY',
-    'KANGNAM MACHINE INDUSTRY',
-    'SWIC',
-    'HSG PEARL SHELL',
-    'HSG HEAVY INDUSTRY',
-    'KUMKWANG HEAVY INDUSTRY',
-    'DOWOO INDUSTRY',
+    'DONGWON INDUSTRY', 'KANGNAM MACHINE INDUSTRY', 'SWIC', 
+    'HSG PEARL SHELL', 'HSG HEAVY INDUSTRY', 'KUMKWANG HEAVY INDUSTRY', 'DOWOO INDUSTRY'
   ];
   
   const vendorStyles = {
@@ -151,6 +142,9 @@ function App() {
     '3515', '3525', '3526', '3527', '3528', '3529', '3530', '3542', '3543', '3556', 
     '3557', '3558', '3559', '3560', '3561', '3562', '3563', '3564', '3565', '3566', '3567'
   ];
+
+  // TK No. 드롭다운 목록 옵션
+  const tkOptions = ['TK1', 'TK2', 'TK3', 'TK4'];
 
   const items = [
     'Liquid dome cover insp.', 'Gas dome insp.', 'Gas dome internal insp.', 
@@ -189,7 +183,6 @@ function App() {
 
   const weekRangeText = `${weekDays[0].dateStr.slice(5).replace('-', '/')} ~ ${weekDays[6].dateStr.slice(5).replace('-', '/')}`;
 
-  // 엑셀 다운로드 (TK No. 반영)
   const handleExcelDownload = () => {
     const activeProjects = ['All Projects', ...new Set(inspections.map(i => i.project))];
     let workbookXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -303,7 +296,6 @@ function App() {
     document.body.removeChild(link);
   };
 
-  // PDF 다운로드
   const handlePdfDownload = () => {
     const printElement = document.getElementById('print-target-area');
     if (!printElement) {
@@ -338,7 +330,7 @@ function App() {
     }
     setShowVendorModal(false);
     setDate(getTodayStr());
-    setTkNo('');
+    setTkNo('TK1'); // 기본값 설정
     setShowRegisterModal(true);
   };
 
@@ -352,7 +344,7 @@ function App() {
     setEditId(itemData.id);
     setProject(itemData.project);
     setShipNo(itemData.shipNo);
-    setTkNo(itemData.tkNo || '');
+    setTkNo(itemData.tkNo || 'TK1');
     setItem(itemData.item);
     setDate(itemData.date);
     setShowEditModal(true);
@@ -377,7 +369,7 @@ function App() {
     setShowRegisterModal(false);
     setProject(''); 
     setShipNo(''); 
-    setTkNo('');
+    setTkNo('TK1');
     setItem('');
     alert('검사 일정이 성공적으로 등록되었습니다!');
   };
@@ -416,12 +408,7 @@ function App() {
             여기는 현대중공업 CHS 아이템 검사 일정<br />
             관리를 위한 공간입니다
           </p>
-          <button 
-            style={styles.enterButton} 
-            onClick={() => setIsEntered(true)}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.25)'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.12)'}
-          >
+          <button style={styles.enterButton} onClick={() => setIsEntered(true)}>
             입장하기
           </button>
           <footer style={styles.footer}>
@@ -779,7 +766,7 @@ function App() {
         </div>
       )}
 
-      {/* 등록 모달 */}
+      {/* 등록 모달 (TK No. 드롭다운 반영) */}
       {showRegisterModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalCard}>
@@ -808,13 +795,9 @@ function App() {
               </div>
               <div style={{ marginBottom: '14px' }}>
                 <label style={styles.labelStyle}>TK No.</label>
-                <input 
-                  type="text" 
-                  value={tkNo} 
-                  onChange={(e) => setTkNo(e.target.value)} 
-                  placeholder="예: TK-01 / #1 Tank" 
-                  style={styles.selectInput} 
-                />
+                <select value={tkNo} onChange={(e) => setTkNo(e.target.value)} style={styles.selectInput} required>
+                  {tkOptions.map((t) => (<option key={t} value={t}>{t}</option>))}
+                </select>
               </div>
               <div style={{ marginBottom: '14px' }}>
                 <label style={styles.labelStyle}>아이템 (검사 항목)</label>
@@ -836,7 +819,7 @@ function App() {
         </div>
       )}
 
-      {/* 수정 모달 */}
+      {/* 수정 모달 (TK No. 드롭다운 반영) */}
       {showEditModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalCard}>
@@ -865,13 +848,9 @@ function App() {
               </div>
               <div style={{ marginBottom: '14px' }}>
                 <label style={styles.labelStyle}>TK No.</label>
-                <input 
-                  type="text" 
-                  value={tkNo} 
-                  onChange={(e) => setTkNo(e.target.value)} 
-                  placeholder="예: TK-01 / #1 Tank" 
-                  style={styles.selectInput} 
-                />
+                <select value={tkNo} onChange={(e) => setTkNo(e.target.value)} style={styles.selectInput} required>
+                  {tkOptions.map((t) => (<option key={t} value={t}>{t}</option>))}
+                </select>
               </div>
               <div style={{ marginBottom: '14px' }}>
                 <label style={styles.labelStyle}>아이템 (검사 항목)</label>
