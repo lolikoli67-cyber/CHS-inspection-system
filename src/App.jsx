@@ -177,8 +177,11 @@ function App() {
     'Sump well block',
     'Liquid dome cover insulation',
     'PTBS insulation',
-    'Sump well insulation'
+    'Sump well insulation',
+    'G/D Bonding', // 추가
+    'PTBS Bonding'  // 추가
   ];
+   
 
   const getWeekDays = (startDate) => {
     const days = [];
