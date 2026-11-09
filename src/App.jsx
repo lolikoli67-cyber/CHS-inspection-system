@@ -912,13 +912,56 @@ function App() {
 }
 
 const styles = {
-  landingContainer: { display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100vw', height: '100vh', background: 'radial-gradient(circle at center, #234e38 0%, #122b1e 100%)', color: '#ffffff', fontFamily: "'Segoe UI', Roboto, sans-serif", textAlign: 'center' },
+  landingContainer: { 
+    display: 'flex', 
+    justify: 'center', 
+    alignItems: 'center', 
+    width: '100vw', 
+    height: '100vh', 
+    backgroundColor: '#234e38', // 레퍼런스의 차분한 딥 그린 톤 
+    color: '#ffffff', 
+    fontFamily: "'Segoe UI', Roboto, sans-serif", 
+    textAlign: 'center' 
+  },
   contentBox: { display: 'flex', flexDirection: 'column', alignItems: 'center' },
-  hdLogo: { fontSize: '4.8rem', fontWeight: '800', letterSpacing: '2px', margin: 0, lineHeight: '1' },
-  subText: { fontSize: '0.8rem', letterSpacing: '3.5px', color: '#a8c3b2', marginTop: '12px', marginBottom: '28px', fontWeight: '600' },
-  description: { fontSize: '1.05rem', lineHeight: '1.65', color: '#e0e7e2', margin: '0 0 32px 0' },
-  enterButton: { padding: '11px 40px', fontSize: '1rem', fontWeight: '500', color: '#fff', backgroundColor: 'rgba(255, 255, 255, 0.12)', border: '1px solid rgba(255, 255, 255, 0.35)', borderRadius: '4px', cursor: 'pointer' },
-  footer: { marginTop: '48px', fontSize: '0.78rem', color: 'rgba(255, 255, 255, 0.45)' },
+  hdLogo: { 
+    fontSize: '3.8rem', 
+    fontWeight: '800', 
+    letterSpacing: '2px', 
+    margin: 0, 
+    lineHeight: '1',
+    color: '#ffffff'
+  },
+  subText: { 
+    fontSize: '0.75rem', 
+    letterSpacing: '3px', 
+    color: 'rgba(255, 255, 255, 0.55)', // 글자색을 은은하고 연하게 조정
+    marginTop: '12px', 
+    marginBottom: '28px', 
+    fontWeight: '600' 
+  },
+  description: { 
+    fontSize: '0.95rem', 
+    lineHeight: '1.6', 
+    color: 'rgba(255, 255, 255, 0.65)', // 중앙 본문 텍스트 톤다운
+    margin: '0 0 32px 0' 
+  },
+  enterButton: { 
+    padding: '10px 36px', 
+    fontSize: '0.95rem', 
+    fontWeight: '600', 
+    color: '#ffffff', 
+    backgroundColor: 'rgba(255, 255, 255, 0.1)', 
+    border: '1px solid rgba(255, 255, 255, 0.3)', 
+    borderRadius: '8px', 
+    cursor: 'pointer' 
+  },
+  footer: { 
+    marginTop: '40px', 
+    fontSize: '0.75rem', 
+    color: 'rgba(255, 255, 255, 0.35)', // 하단 풋터 글자색 연하게 
+    lineHeight: '1.5'
+  },
 
   mainLayout: { display: 'flex', width: '100vw', height: '100vh', backgroundColor: '#f3f4f6', fontFamily: "'Segoe UI', Roboto, sans-serif" },
   sidebar: { width: '240px', backgroundColor: '#1b4332', color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '20px 16px' },
