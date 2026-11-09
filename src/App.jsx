@@ -918,7 +918,7 @@ const styles = {
     alignItems: 'center',       // 세로 중앙 정렬
     width: '100vw', 
     height: '100vh', 
-    backgroundColor: '#234e38', 
+    backgroundColor: '#234e38',
     color: '#ffffff', 
     fontFamily: "'Segoe UI', Roboto, sans-serif", 
     textAlign: 'center' 
@@ -929,7 +929,7 @@ contentBox: {
     alignItems: 'center',       // 내부 콘텐츠도 완벽히 중앙 정렬
     textAlign: 'center' 
   },
-  
+
   hdLogo: { 
     fontSize: '3.8rem', 
     fontWeight: '800', 
