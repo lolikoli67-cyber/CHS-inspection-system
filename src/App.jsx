@@ -3,17 +3,18 @@ import React, { useState, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 
 function App() {
+  // 최초 접속 시 대문이 뜨도록 기본값을 false로 설정하고, '입장하기' 버튼을 눌렀을 때만 sessionStorage에 기록
   const [isEntered, setIsEntered] = useState(() => {
-    return localStorage.getItem('chs_is_entered') === 'true';
+    return sessionStorage.getItem('chs_is_entered') === 'true';
   });
 
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
     if (isEntered) {
-      localStorage.setItem('chs_is_entered', 'true');
+      sessionStorage.setItem('chs_is_entered', 'true');
     } else {
-      localStorage.removeItem('chs_is_entered');
+      sessionStorage.removeItem('chs_is_entered');
     }
   }, [isEntered]);
 
@@ -210,7 +211,6 @@ function App() {
 
   const weekRangeText = `${weekDays[0].dateStr.slice(5).replace('-', '/')} ~ ${weekDays[6].dateStr.slice(5).replace('-', '/')}`;
 
-  // 엑셀 다운로드 셀 텍스트 순서 변경: 호선 / 아이템 / TK 넘버 순서
   const handleExcelDownload = () => {
     const activeProjects = ['All Projects', ...new Set(inspections.map(i => i.project))];
     let workbookXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -300,7 +300,6 @@ function App() {
           });
 
           if (matches.length > 0) {
-            // 호선 / 아이템 / TK 넘버 순서로 조합
             const cellText = matches.map(m => `${m.shipNo} ${m.item} ${m.tkNo ? `(TK No.: ${m.tkNo})` : ''}`).join('\n');
             const safeKey = vendor.replace(/[^a-zA-Z0-9]/g, '_');
             workbookXml += `<Cell ss:StyleID="DataStyle_${safeKey}"><Data ss:Type="String">${cellText}</Data></Cell>`;
