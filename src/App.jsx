@@ -921,18 +921,19 @@ const styles = {
     fontFamily: "'Segoe UI', Roboto, sans-serif", 
     textAlign: 'center',
     position: 'fixed',
-    top: 0,
-    left: 0,
+    top: 0,                   // 뷰포트 상단 밀착
+    left: 0,                  // 뷰포트 좌측 밀착
     zIndex: 9999
   },
 contentBox: { 
     display: 'flex', 
     flexDirection: 'column', 
-    alignItems: 'center',       // 내부 요소들 중앙 정렬
-    textAlign: 'center',        // 텍스트 중앙 정렬
-    width: '100%',              // 가로 공간 100% 차지
-    maxWidth: '500px',          // 최대 폭 제한으로 안정감 부여
-    padding: '0 20px',          // 모바일/좁은 화면 여백 확보
+    alignItems: 'center',       // 내부 요소 가로 중앙 정렬
+    justifyContent: 'center',  // 내부 요소 세로 중앙 정렬
+    textAlign: 'center', 
+    width: '100%', 
+    maxWidth: '500px', 
+    padding: '0 20px', 
     boxSizing: 'border-box'
   },
 
