@@ -914,11 +914,11 @@ function App() {
 const styles = {
   landingContainer: { 
     display: 'flex', 
-    justify: 'center', 
+    justifyContent: 'center', // 가운데 정렬 복구
     alignItems: 'center', 
     width: '100vw', 
     height: '100vh', 
-    backgroundColor: '#234e38', // 레퍼런스의 차분한 딥 그린 톤 
+    backgroundColor: '#234e38', 
     color: '#ffffff', 
     fontFamily: "'Segoe UI', Roboto, sans-serif", 
     textAlign: 'center' 
