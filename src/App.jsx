@@ -429,25 +429,22 @@ function App() {
     }
   };
 
-  if (!isEntered) {
+  if (!isLoggedIn) {
     return (
       <div style={styles.landingContainer}>
         <div style={styles.contentBox}>
           <h1 style={styles.hdLogo}>HD</h1>
           <p style={styles.subText}>HYUNDAI HEAVY INDUSTRIES</p>
           <p style={styles.description}>
-            여기는 현대중공업 CHS 아이템 검사 일정<br />
-            관리를 위한 공간입니다
+            여기는 현대중공업 CHS 아이템 검사 일정<br />관리를 위한 공간입니다
           </p>
-          <button style={styles.enterButton} onClick={() => setIsEntered(true)}>
+          <button style={styles.enterButton} onClick={() => setIsLoggedIn(true)}>
             입장하기
           </button>
-          <footer style={styles.footer}>
+          <div style={styles.footer}>
             CHS Quality Inspection Schedule System<br />
-            <span style={{ fontSize: '0.75rem', opacity: 0.6, display: 'inline-block', marginTop: '4px' }}>
-              Developed by EJ.Lee
-            </span>
-          </footer>
+            Developed by EJ.Lee
+          </div>
         </div>
       </div>
     );
@@ -914,14 +911,19 @@ function App() {
 const styles = {
   landingContainer: { 
     display: 'flex', 
-    justifyContent: 'center', // 가로 중앙 정렬 추가
-    alignItems: 'center',       // 세로 중앙 정렬
+    flexDirection: 'column',
+    justifyContent: 'center', // 세로 중앙
+    alignItems: 'center',     // 가로 중앙
     width: '100vw', 
     height: '100vh', 
-    backgroundColor: '#234e38',
+    backgroundColor: '#234e38', 
     color: '#ffffff', 
     fontFamily: "'Segoe UI', Roboto, sans-serif", 
-    textAlign: 'center' 
+    textAlign: 'center',
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    zIndex: 9999
   },
 contentBox: { 
     display: 'flex', 
