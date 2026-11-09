@@ -6,7 +6,7 @@ function App() {
   const [isEntered, setIsEntered] = useState(false);
   const [events, setEvents] = useState([]);
 
-  // 1. 일정 불러오기
+  // 1. Supabase 일정 불러오기
   useEffect(() => {
     fetchSchedules();
   }, []);
@@ -19,35 +19,66 @@ function App() {
 
     if (error) {
       console.error('일정 불러오기 실패:', error);
-    } else {
+    } else if (data) {
       setEvents(data);
     }
   };
 
-  // 2. 새 일정 추가하기
+  // Supabase DB 데이터 -> 화면 사용 객체 매핑
+  const inspections = events.map(ev => ({
+    id: ev.id,
+    vendor: ev.vendor || '',
+    project: ev.block || '',
+    shipNo: ev.hull_no || '',
+    tkNo: ev.TK_NO || ev.tk_no || '',
+    item: ev.item || '',
+    date: ev.date || '',
+  }));
+
+  // 2. 새 일정 추가 (Supabase 저장 후 즉시 목록 갱신)
   const handleAddEvent = async (newEventData) => {
     const { error } = await supabase
       .from('schedule_events')
       .insert([{
         date: newEventData.date,
         vendor: newEventData.vendor,
-        hull_no: newEventData.hull_no || newEventData.hullNo,
-        block: newEventData.block,
+        hull_no: newEventData.shipNo,
+        block: newEventData.project,
+        TK_NO: newEventData.tkNo,
         item: newEventData.item,
-        time: newEventData.time,
-        location: newEventData.location,
-        notes: newEventData.notes
       }]);
 
     if (error) {
       console.error('DB 저장 에러:', error);
       alert('저장 실패: ' + error.message);
     } else {
-      fetchSchedules();
+      await fetchSchedules();
     }
   };
 
-  // 3. 일정 삭제하기
+  // 3. 일정 수정
+  const handleUpdateEvent = async (id, updatedData) => {
+    const { error } = await supabase
+      .from('schedule_events')
+      .update({
+        date: updatedData.date,
+        vendor: updatedData.vendor,
+        hull_no: updatedData.shipNo,
+        block: updatedData.project,
+        TK_NO: updatedData.tkNo,
+        item: updatedData.item,
+      })
+      .eq('id', id);
+
+    if (error) {
+      console.error('DB 수정 에러:', error);
+      alert('수정 실패: ' + error.message);
+    } else {
+      await fetchSchedules();
+    }
+  };
+
+  // 4. 일정 삭제
   const handleDeleteEvent = async (id) => {
     const { error } = await supabase
       .from('schedule_events')
@@ -55,12 +86,12 @@ function App() {
       .eq('id', id);
 
     if (error) {
-      alert('삭제 실패');
+      alert('삭제 실패: ' + error.message);
     } else {
-      fetchSchedules();
+      await fetchSchedules();
     }
   };
-  
+
   const [currentTab, setCurrentTab] = useState('register');
   const [selectedVendor, setSelectedVendor] = useState('전체');
   const [selectedProjectFilter, setSelectedProjectFilter] = useState('전체');
@@ -72,6 +103,7 @@ function App() {
   const [editId, setEditId] = useState(null);
   const [project, setProject] = useState('');
   const [shipNo, setShipNo] = useState('');
+  const [tkNo, setTkNo] = useState('');
   const [item, setItem] = useState('');
   
   const getTodayStr = () => {
@@ -126,31 +158,6 @@ function App() {
     'Helium Leak test', 'Sump well', 'Sump well block', 'Insulation insp.', 'Bonding insp.'
   ];
 
-  const [inspections, setInspections] = useState(() => {
-    const saved = localStorage.getItem('chs_inspections');
-    if (saved) {
-      try { 
-        const parsed = JSON.parse(saved);
-        return parsed.map(ins => {
-          let v = ins.vendor;
-          if (v.includes('DongWon') || v.includes('DONGWON')) v = 'DONGWON INDUSTRY';
-          else if (v.includes('Kangnam') || v.includes('KANGNAM')) v = 'KANGNAM MACHINE INDUSTRY';
-          else if (v.includes('PearShell') || v.includes('PEARL')) v = 'HSG PEARL SHELL';
-          else if (v.includes('HEAVY')) v = 'HSG HEAVY INDUSTRY';
-          else if (v.includes('KUMKWANG')) v = 'KUMKWANG HEAVY INDUSTRY';
-          return { ...ins, vendor: v };
-        });
-      } catch (e) { console.error(e); }
-    }
-    return [
-      { id: 1, vendor: 'DONGWON INDUSTRY', project: 'NYK', shipNo: '3525', item: 'Gas dome insp.', date: '2026-11-02' },
-      { id: 2, vendor: 'HSG PEARL SHELL', project: 'NAKILAT', shipNo: '3556', item: 'Liquid dome coaming insp.', date: '2026-11-05' },
-      { id: 3, vendor: 'KANGNAM MACHINE INDUSTRY', project: 'NAKILAT', shipNo: '3556', item: 'Liquid dome coaming insp.', date: '2026-11-06' },
-      { id: 4, vendor: 'DONGWON INDUSTRY', project: 'NAKILAT', shipNo: '3481', item: 'Gas dome internal insp.', date: '2026-11-04' },
-      { id: 5, vendor: 'DONGWON INDUSTRY', project: 'NAKILAT', shipNo: '3556', item: 'Liquid dome coaming insp.', date: '2026-11-04' },
-    ];
-  });
-
   const getWeekDays = (startDate) => {
     const days = [];
     for (let i = 0; i < 7; i++) {
@@ -182,6 +189,7 @@ function App() {
 
   const weekRangeText = `${weekDays[0].dateStr.slice(5).replace('-', '/')} ~ ${weekDays[6].dateStr.slice(5).replace('-', '/')}`;
 
+  // 엑셀 다운로드 (TK No. 반영)
   const handleExcelDownload = () => {
     const activeProjects = ['All Projects', ...new Set(inspections.map(i => i.project))];
     let workbookXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -271,7 +279,7 @@ function App() {
           });
 
           if (matches.length > 0) {
-            const cellText = matches.map(m => `${m.shipNo} ${m.item}`).join('\n');
+            const cellText = matches.map(m => `${m.shipNo} ${m.tkNo ? `(TK No.: ${m.tkNo}) ` : ''}${m.item}`).join('\n');
             const safeKey = vendor.replace(/[^a-zA-Z0-9]/g, '_');
             workbookXml += `<Cell ss:StyleID="DataStyle_${safeKey}"><Data ss:Type="String">${cellText}</Data></Cell>`;
           } else {
@@ -295,6 +303,7 @@ function App() {
     document.body.removeChild(link);
   };
 
+  // PDF 다운로드
   const handlePdfDownload = () => {
     const printElement = document.getElementById('print-target-area');
     if (!printElement) {
@@ -329,6 +338,7 @@ function App() {
     }
     setShowVendorModal(false);
     setDate(getTodayStr());
+    setTkNo('');
     setShowRegisterModal(true);
   };
 
@@ -342,6 +352,7 @@ function App() {
     setEditId(itemData.id);
     setProject(itemData.project);
     setShipNo(itemData.shipNo);
+    setTkNo(itemData.tkNo || '');
     setItem(itemData.item);
     setDate(itemData.date);
     setShowEditModal(true);
@@ -350,54 +361,48 @@ function App() {
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     if (!project || !shipNo || !item || !date) {
-      alert('모든 항목을 입력해 주세요.');
+      alert('모든 필수 항목을 입력해 주세요.');
       return;
     }
 
-    const newInspection = {
-      id: Date.now(),
-      vendor: activeVendor,
-      project,
-      shipNo,
-      item,
-      date,
-    };
-
     await handleAddEvent({
-      date: newInspection.date,
-      vendor: newInspection.vendor,
-      hull_no: newInspection.shipNo,
-      block: newInspection.project,
-      item: newInspection.item,
-      time: newInspection.time || '',
-      location: newInspection.location || '',
-      notes: newInspection.notes || ''
+      date,
+      vendor: activeVendor,
+      shipNo,
+      project,
+      tkNo,
+      item,
     });
 
     setShowRegisterModal(false);
     setProject(''); 
     setShipNo(''); 
+    setTkNo('');
     setItem('');
-  }; // <--- [정상 닫힘]
+    alert('검사 일정이 성공적으로 등록되었습니다!');
+  };
 
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
-    setInspections(inspections.map(ins => 
-      ins.id === editId 
-        ? { ...ins, project, shipNo, item, date }
-        : ins
-    ));
+    await handleUpdateEvent(editId, {
+      date,
+      vendor: activeVendor,
+      shipNo,
+      project,
+      tkNo,
+      item,
+    });
     setShowEditModal(false);
     alert('검사 일정이 수정되었습니다.');
   };
 
-  const handleDelete = (itemData) => {
+  const handleDelete = async (itemData) => {
     if (activeVendor && activeVendor !== itemData.vendor) {
       alert('본인 협력사 데이터만 삭제할 수 있습니다.');
       return;
     }
     if (window.confirm('정말 삭제하시겠습니까?')) {
-      setInspections(inspections.filter(ins => ins.id !== itemData.id));
+      await handleDeleteEvent(itemData.id);
     }
   };
 
@@ -564,7 +569,7 @@ function App() {
                                   onClick={() => handleCardClick(itemData)}
                                 >
                                   <div style={{ ...styles.cardVendor, color: vStyle.text }}>{itemData.vendor}</div>
-                                  <div style={styles.cardDetail}>[{itemData.project}] {itemData.shipNo}</div>
+                                  <div style={styles.cardDetail}>[{itemData.project}] {itemData.shipNo} {itemData.tkNo && `(TK No.: ${itemData.tkNo})`}</div>
                                   <div style={styles.cardItemName}>{itemData.item}</div>
                                 </div>
                               );
@@ -576,22 +581,24 @@ function App() {
                   </div>
                 </div>
 
+                {/* 목록 테이블 */}
                 <div style={styles.listCard}>
                   <div style={styles.listHeaderTitle}>이번 주 검사 목록</div>
                   <table style={styles.table}>
                     <thead>
                       <tr style={styles.thRow}>
-                        <th style={{ ...styles.th, width: '20%' }}>협력사</th>
-                        <th style={{ ...styles.th, width: '15%' }}>프로젝트</th>
-                        <th style={{ ...styles.th, width: '15%' }}>호선</th>
-                        <th style={{ ...styles.th, width: '25%' }}>아이템</th>
-                        <th style={{ ...styles.th, width: '15%' }}>날짜</th>
-                        <th style={{ ...styles.th, width: '10%' }}>관리</th>
+                        <th style={{ ...styles.th, width: '18%' }}>협력사</th>
+                        <th style={{ ...styles.th, width: '13%' }}>프로젝트</th>
+                        <th style={{ ...styles.th, width: '12%' }}>호선</th>
+                        <th style={{ ...styles.th, width: '14%' }}>TK No.</th>
+                        <th style={{ ...styles.th, width: '23%' }}>아이템</th>
+                        <th style={{ ...styles.th, width: '12%' }}>날짜</th>
+                        <th style={{ ...styles.th, width: '8%' }}>관리</th>
                       </tr>
                     </thead>
                     <tbody>
                       {weekInspections.length === 0 ? (
-                        <tr><td colSpan="6" style={{ ...styles.td, textAlign: 'center', color: '#9ca3af', padding: '24px' }}>이번 주에 등록된 검사 일정이 없습니다.</td></tr>
+                        <tr><td colSpan="7" style={{ ...styles.td, textAlign: 'center', color: '#9ca3af', padding: '24px' }}>이번 주에 등록된 검사 일정이 없습니다.</td></tr>
                       ) : (
                         weekInspections.map((itemData) => {
                           const vStyle = vendorStyles[itemData.vendor] || { text: '#1b4332' };
@@ -600,6 +607,7 @@ function App() {
                               <td style={{ ...styles.td, fontWeight: 'bold', color: vStyle.text }}>{itemData.vendor}</td>
                               <td style={styles.td}>{itemData.project}</td>
                               <td style={styles.td}>{itemData.shipNo}</td>
+                              <td style={{ ...styles.td, fontWeight: '600', color: '#0369a1' }}>{itemData.tkNo || '-'}</td>
                               <td style={styles.td}>{itemData.item}</td>
                               <td style={styles.td}>{itemData.date}</td>
                               <td style={styles.td}>
@@ -731,7 +739,7 @@ function App() {
                                   onClick={() => handleCardClick(itemData)}
                                 >
                                   <div style={{ ...styles.cardVendor, color: vStyle.text }}>{itemData.vendor}</div>
-                                  <div style={styles.cardDetail}>[{itemData.project}] {itemData.shipNo}</div>
+                                  <div style={styles.cardDetail}>[{itemData.project}] {itemData.shipNo} {itemData.tkNo && `(TK No.: ${itemData.tkNo})`}</div>
                                   <div style={styles.cardItemName}>{itemData.item}</div>
                                 </div>
                               );
@@ -771,6 +779,7 @@ function App() {
         </div>
       )}
 
+      {/* 등록 모달 */}
       {showRegisterModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalCard}>
@@ -798,6 +807,16 @@ function App() {
                 </select>
               </div>
               <div style={{ marginBottom: '14px' }}>
+                <label style={styles.labelStyle}>TK No.</label>
+                <input 
+                  type="text" 
+                  value={tkNo} 
+                  onChange={(e) => setTkNo(e.target.value)} 
+                  placeholder="예: TK-01 / #1 Tank" 
+                  style={styles.selectInput} 
+                />
+              </div>
+              <div style={{ marginBottom: '14px' }}>
                 <label style={styles.labelStyle}>아이템 (검사 항목)</label>
                 <select value={item} onChange={(e) => setItem(e.target.value)} style={styles.selectInput} required>
                   <option value="">-- 선택 --</option>
@@ -817,6 +836,7 @@ function App() {
         </div>
       )}
 
+      {/* 수정 모달 */}
       {showEditModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalCard}>
@@ -842,6 +862,16 @@ function App() {
                   <option value="">-- 선택 --</option>
                   {shipNumbers.map((s) => (<option key={s} value={s}>{s}</option>))}
                 </select>
+              </div>
+              <div style={{ marginBottom: '14px' }}>
+                <label style={styles.labelStyle}>TK No.</label>
+                <input 
+                  type="text" 
+                  value={tkNo} 
+                  onChange={(e) => setTkNo(e.target.value)} 
+                  placeholder="예: TK-01 / #1 Tank" 
+                  style={styles.selectInput} 
+                />
               </div>
               <div style={{ marginBottom: '14px' }}>
                 <label style={styles.labelStyle}>아이템 (검사 항목)</label>
