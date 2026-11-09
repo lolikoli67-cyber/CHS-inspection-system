@@ -556,7 +556,7 @@ function App() {
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div style={styles.noticeBar}>
                   <span style={{ fontWeight: 'bold', color: '#b91c1c' }}>📢 공지사항</span>
-                  <span style={{ marginLeft: '12px', color: '#374151' }}>프로그램 일부 업데이트 공지 드립니다. 문의사항은 언제든지 연락주세요.</span>
+                  <span style={{ marginLeft: '12px', color: '#374151' }}>HHI CHS 아이템 사외 검사 시스템입니다. 사용 관련 문의는 leeeunju@hd.com / 010-9518-6070 으로 연락 바랍니다</span>
                 </div>
 
                 <div style={styles.calendarCard}>
