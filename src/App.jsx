@@ -3,8 +3,20 @@ import React, { useState, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 
 function App() {
-  const [isEntered, setIsEntered] = useState(false);
+  // 새로고침 시에도 대문자 화면으로 돌아가지 않도록 localStorage 연동
+  const [isEntered, setIsEntered] = useState(() => {
+    return localStorage.getItem('chs_is_entered') === 'true';
+  });
+
   const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    if (isEntered) {
+      localStorage.setItem('chs_is_entered', 'true');
+    } else {
+      localStorage.removeItem('chs_is_entered');
+    }
+  }, [isEntered]);
 
   useEffect(() => {
     fetchSchedules();
@@ -111,7 +123,16 @@ function App() {
   };
 
   const [date, setDate] = useState(getTodayStr());
-  const [currentWeekStart, setCurrentWeekStart] = useState(new Date('2026-11-02'));
+
+  // 오늘 날짜(2026-11-09 등)를 기준으로 이번 주 월요일을 계산하여 첫 화면에 표시
+  const getThisWeekMonday = () => {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // 월요일 기준
+    return new Date(d.setDate(diff));
+  };
+
+  const [currentWeekStart, setCurrentWeekStart] = useState(getThisWeekMonday());
 
   const vendors = [
     'DONGWON INDUSTRY', 'KANGNAM MACHINE INDUSTRY', 'SWIC', 
@@ -145,10 +166,20 @@ function App() {
 
   const tkOptions = ['TK1', 'TK2', 'TK3', 'TK4'];
 
+  // 요청하신 검사 항목 목록 반영 (insp. 제거 및 항목 추가/삭제)
   const items = [
-    'Liquid dome cover insp.', 'Gas dome insp.', 'Gas dome internal insp.', 
-    'Liquid dome coaming insp.', 'Pump tower base plate insp.', 'Pump tower base support insp.', 
-    'Helium Leak test', 'Sump well', 'Sump well block', 'Insulation insp.', 'Bonding insp.'
+    'Liquid dome cover',
+    'Gas dome',
+    'Gas dome internal',
+    'Liquid dome coaming',
+    'Pump tower base plate',
+    'Pump tower base support',
+    'Helium Leak test',
+    'Sump well',
+    'Sump well block',
+    'Liquid dome cover insulation',
+    'PTBS insulation',
+    'Sump well insulation'
   ];
 
   const getWeekDays = (startDate) => {
@@ -765,7 +796,7 @@ function App() {
         </div>
       )}
 
-      {/* 등록 모달 (TK No. 드롭다운 반영) */}
+      {/* 등록 모달 */}
       {showRegisterModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalCard}>
@@ -818,7 +849,7 @@ function App() {
         </div>
       )}
 
-      {/* 수정 모달 (TK No. 드롭다운 반영) */}
+      {/* 수정 모달 */}
       {showEditModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalCard}>
