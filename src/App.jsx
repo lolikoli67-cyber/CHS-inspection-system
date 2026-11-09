@@ -926,8 +926,12 @@ const styles = {
 contentBox: { 
     display: 'flex', 
     flexDirection: 'column', 
-    alignItems: 'center',       // 내부 콘텐츠도 완벽히 중앙 정렬
-    textAlign: 'center' 
+    alignItems: 'center',       // 내부 요소들 중앙 정렬
+    textAlign: 'center',        // 텍스트 중앙 정렬
+    width: '100%',              // 가로 공간 100% 차지
+    maxWidth: '500px',          // 최대 폭 제한으로 안정감 부여
+    padding: '0 20px',          // 모바일/좁은 화면 여백 확보
+    boxSizing: 'border-box'
   },
 
   hdLogo: { 
