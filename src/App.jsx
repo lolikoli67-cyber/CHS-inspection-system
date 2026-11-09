@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 
 function App() {
-  // 최초 접속 시 대문이 뜨도록 기본값을 false로 설정하고, '입장하기' 버튼을 눌렀을 때만 sessionStorage에 기록
   const [isEntered, setIsEntered] = useState(() => {
     return sessionStorage.getItem('chs_is_entered') === 'true';
   });
@@ -460,7 +459,12 @@ function App() {
     <div style={styles.mainLayout}>
       <aside style={styles.sidebar}>
         <div>
-          <div style={styles.sidebarLogoBox}>
+          {/* 좌측 상단 HD 로고 영역 클릭 시 대문으로 돌아가도록 onClick 및 스타일 추가 */}
+          <div 
+            style={{ ...styles.sidebarLogoBox, cursor: 'pointer' }}
+            onClick={() => setIsEntered(false)}
+            title="대문으로 돌아가기"
+          >
             <h1 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '800' }}>HD</h1>
             <p style={{ margin: '4px 0 0 0', fontSize: '0.7rem', color: '#a8c3b2', letterSpacing: '1px' }}>
               현대중공업 CHS 검사 일정 관리
@@ -959,7 +963,7 @@ const styles = {
   tableEditBtn: { border: '1px solid #6366f1', color: '#4f46e5', backgroundColor: '#f5f3ff', borderRadius: '4px', padding: '3px 8px', fontSize: '0.75rem', cursor: 'pointer' },
   tableDeleteBtn: { border: '1px solid #fca5a5', color: '#dc2626', backgroundColor: '#fef2f2', borderRadius: '4px', padding: '3px 8px', fontSize: '0.75rem', cursor: 'pointer' },
 
-  modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 },
+  modalOverlay: {position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 },
   modalCard: { backgroundColor: '#fff', width: '380px', borderRadius: '8px', padding: '20px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #eee', paddingBottom: '10px' },
   closeBtn: { background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#666' },
