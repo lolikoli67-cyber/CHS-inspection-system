@@ -134,7 +134,7 @@ function App() {
 
   const vendors = [
     'DONGWON INDUSTRY', 'KANGNAM MACHINE INDUSTRY', 'SWIC', 
-    'HSG PEARL SHELL', 'HSG HEAVY INDUSTRY', 'KUMKWANG HEAVY INDUSTRY', 'DOWOO INDUSTRY'
+    'HSG PEARL SHELL', 'HSG HEAVY INDUSTRY', 'KUMKWANG HEAVY INDUSTRY', 'DOWOO INDUSTRY', 'SAMWON TECHNO'
   ];
   
   const vendorStyles = {
@@ -145,6 +145,7 @@ function App() {
     'HSG HEAVY INDUSTRY': { bg: '#fae8ff', border: '#c084fc', text: '#a855f7', excelBg: '#FAE8FF' },
     'KUMKWANG HEAVY INDUSTRY': { bg: '#fee2e2', border: '#dc2626', text: '#b91c1c', excelBg: '#FEE2E2' },
     'DOWOO INDUSTRY': { bg: '#ccfbf1', border: '#0d9488', text: '#0f766e', excelBg: '#CCFBF1' },
+    'SAMWON TECHNO': { bg: '#fef6ee', border: '#ea580c', text: '#c2410c', excelBg: '#FEF6EE' }, // 추가 (오렌지 계열)
   };
 
   const projects = [
