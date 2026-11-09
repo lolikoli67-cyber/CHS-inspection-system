@@ -43,7 +43,7 @@ function App() {
         block: newEventData.project,
         TK_NO: newEventData.tkNo,
         item: newEventData.item,
-        time: '', // not null 제약 방지용 빈값
+        time: '',
       }]);
 
     if (error) {
@@ -99,7 +99,7 @@ function App() {
   const [editId, setEditId] = useState(null);
   const [project, setProject] = useState('');
   const [shipNo, setShipNo] = useState('');
-  const [tkNo, setTkNo] = useState('');
+  const [tkNo, setTkNo] = useState('TK1');
   const [item, setItem] = useState('');
   
   const getTodayStr = () => {
@@ -143,7 +143,6 @@ function App() {
     '3557', '3558', '3559', '3560', '3561', '3562', '3563', '3564', '3565', '3566', '3567'
   ];
 
-  // TK No. 드롭다운 목록 옵션
   const tkOptions = ['TK1', 'TK2', 'TK3', 'TK4'];
 
   const items = [
@@ -330,7 +329,7 @@ function App() {
     }
     setShowVendorModal(false);
     setDate(getTodayStr());
-    setTkNo('TK1'); // 기본값 설정
+    setTkNo('TK1');
     setShowRegisterModal(true);
   };
 
