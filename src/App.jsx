@@ -914,8 +914,8 @@ function App() {
 const styles = {
   landingContainer: { 
     display: 'flex', 
-    justifyContent: 'center', // 가운데 정렬 복구
-    alignItems: 'center', 
+    justifyContent: 'center', // 가로 중앙 정렬 추가
+    alignItems: 'center',       // 세로 중앙 정렬
     width: '100vw', 
     height: '100vh', 
     backgroundColor: '#234e38', 
@@ -923,7 +923,13 @@ const styles = {
     fontFamily: "'Segoe UI', Roboto, sans-serif", 
     textAlign: 'center' 
   },
-  contentBox: { display: 'flex', flexDirection: 'column', alignItems: 'center' },
+contentBox: { 
+    display: 'flex', 
+    flexDirection: 'column', 
+    alignItems: 'center',       // 내부 콘텐츠도 완벽히 중앙 정렬
+    textAlign: 'center' 
+  },
+  
   hdLogo: { 
     fontSize: '3.8rem', 
     fontWeight: '800', 
