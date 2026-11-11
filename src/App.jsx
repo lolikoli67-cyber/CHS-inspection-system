@@ -6,7 +6,7 @@ function App() {
   const [isEntered, setIsEntered] = useState(() => {
     return sessionStorage.getItem('chs_is_entered') === 'true';
   });
-
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
@@ -41,6 +41,7 @@ function App() {
     shipNo: ev.hull_no || '',
     tkNo: ev.TK_NO || ev.tk_no || '',
     item: ev.item || '',
+    etc: ev.notes || '', // 기존 notes 컬럼을 기타 텍스트로 매핑
     date: ev.date || '',
   }));
 
@@ -54,6 +55,7 @@ function App() {
         block: newEventData.project,
         TK_NO: newEventData.tkNo,
         item: newEventData.item,
+        notes: newEventData.etc, // DB notes 컬럼에 저장
         time: '',
       }]);
 
@@ -75,6 +77,7 @@ function App() {
         block: updatedData.project,
         TK_NO: updatedData.tkNo,
         item: updatedData.item,
+        notes: updatedData.etc, // DB notes 컬럼 수정
       })
       .eq('id', id);
 
@@ -112,6 +115,7 @@ function App() {
   const [shipNo, setShipNo] = useState('');
   const [tkNo, setTkNo] = useState('TK1');
   const [item, setItem] = useState('');
+  const [etc, setEtc] = useState(''); 
   
   const getTodayStr = () => {
     const d = new Date();
@@ -145,7 +149,7 @@ function App() {
     'HSG HEAVY INDUSTRY': { bg: '#fae8ff', border: '#c084fc', text: '#a855f7', excelBg: '#FAE8FF' },
     'KUMKWANG HEAVY INDUSTRY': { bg: '#fee2e2', border: '#dc2626', text: '#b91c1c', excelBg: '#FEE2E2' },
     'DOWOO INDUSTRY': { bg: '#ccfbf1', border: '#0d9488', text: '#0f766e', excelBg: '#CCFBF1' },
-    'SAMWON TECHNO': { bg: '#fef6ee', border: '#ea580c', text: '#c2410c', excelBg: '#FEF6EE' }, // 추가 (오렌지 계열)
+    'SAMWON TECHNO': { bg: '#fef6ee', border: '#ea580c', text: '#c2410c', excelBg: '#FEF6EE' },
   };
 
   const projects = [
@@ -160,7 +164,7 @@ function App() {
     '3486', '3487', '3488', '3489', '3490', '3491', '3492', '3493', '3494', '3495', 
     '3496', '3497', '3498', '3499', '3500', '3501', '3502', '3507', '3508', '3514', 
     '3515', '3525', '3526', '3527', '3528', '3529', '3530', '3542', '3543', '3556', 
-    '3557', '3558', '3559', '3560', '3561', '3562', '3563', '3564', '3565', '3566', '3567'
+    '3557', '3558', '3559', '3560', '3561', '3562', '3563', '3564', '3565', '3566', '3567', 'HL419'
   ];
 
   const tkOptions = ['TK1', 'TK2', 'TK3', 'TK4'];
@@ -174,14 +178,8 @@ function App() {
     'Pump tower base support',
     'Helium Leak test',
     'Sump well',
-    'Sump well block',
-    'Liquid dome cover insulation',
-    'PTBS insulation',
-    'Sump well insulation',
-    'G/D Bonding', // 추가
-    'PTBS Bonding'  // 추가
+    'Sump well block'
   ];
-   
 
   const getWeekDays = (startDate) => {
     const days = [];
@@ -301,9 +299,12 @@ function App() {
             const matchProj = proj === 'All Projects' || ins.project === proj;
             return ins.vendor === vendor && ins.date === w.dateStr && matchProj;
           });
-
           if (matches.length > 0) {
-            const cellText = matches.map(m => `${m.shipNo} ${m.item} ${m.tkNo ? `(TK No.: ${m.tkNo})` : ''}`).join('\n');
+            const cellText = matches.map(m => {
+              const etcStr = m.etc ? ` (${m.etc})` : '';
+              return `${m.shipNo} ${m.item}${m.tkNo ? ` ${m.tkNo}` : ''}${etcStr}`;
+            }).join('&#10;');
+            
             const safeKey = vendor.replace(/[^a-zA-Z0-9]/g, '_');
             workbookXml += `<Cell ss:StyleID="DataStyle_${safeKey}"><Data ss:Type="String">${cellText}</Data></Cell>`;
           } else {
@@ -362,6 +363,7 @@ function App() {
     setShowVendorModal(false);
     setDate(getTodayStr());
     setTkNo('TK1');
+    setEtc('');
     setShowRegisterModal(true);
   };
 
@@ -377,6 +379,7 @@ function App() {
     setShipNo(itemData.shipNo);
     setTkNo(itemData.tkNo || 'TK1');
     setItem(itemData.item);
+    setEtc(itemData.etc || '');
     setDate(itemData.date);
     setShowEditModal(true);
   };
@@ -395,6 +398,7 @@ function App() {
       project,
       tkNo,
       item,
+      etc,
     });
 
     setShowRegisterModal(false);
@@ -402,6 +406,7 @@ function App() {
     setShipNo(''); 
     setTkNo('TK1');
     setItem('');
+    setEtc('');
     alert('검사 일정이 성공적으로 등록되었습니다!');
   };
 
@@ -414,6 +419,7 @@ function App() {
       project,
       tkNo,
       item,
+      etc,
     });
     setShowEditModal(false);
     alert('검사 일정이 수정되었습니다.');
@@ -460,10 +466,9 @@ function App() {
     <div style={styles.mainLayout}>
       <aside style={styles.sidebar}>
         <div>
-          {/* 좌측 상단 HD 로고 영역 클릭 시 대문으로 돌아가도록 onClick 및 스타일 추가 */}
           <div 
             style={{ ...styles.sidebarLogoBox, cursor: 'pointer' }}
-            onClick={() => setIsEntered(false)}
+            onClick={() => { setIsLoggedIn(false); setIsEntered(false); }}
             title="대문으로 돌아가기"
           >
             <h1 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '800' }}>HD</h1>
@@ -588,8 +593,9 @@ function App() {
                                   style={{ ...styles.inspectionCard, backgroundColor: vStyle.bg, borderLeft: `4px solid ${vStyle.border}` }}
                                   onClick={() => handleCardClick(itemData)}
                                 >
-                                  <div style={{ ...styles.cardVendor, color: vStyle.text }}>{itemData.vendor}</div>
-                                  <div style={styles.cardDetail}>[{itemData.project}] {itemData.shipNo} {itemData.tkNo && `(TK No.: ${itemData.tkNo})`}</div>
+                                  <div style={styles.cardDetail}>
+                                    [{itemData.project}] {itemData.shipNo}{itemData.tkNo ? ` ${itemData.tkNo}` : ''}{itemData.etc ? ` (${itemData.etc})` : ''}
+                                  </div>
                                   <div style={styles.cardItemName}>{itemData.item}</div>
                                 </div>
                               );
@@ -627,7 +633,9 @@ function App() {
                               <td style={{ ...styles.td, fontWeight: 'bold', color: vStyle.text }}>{itemData.vendor}</td>
                               <td style={styles.td}>{itemData.project}</td>
                               <td style={styles.td}>{itemData.shipNo}</td>
-                              <td style={{ ...styles.td, fontWeight: '600', color: '#0369a1' }}>{itemData.tkNo || '-'}</td>
+                              <td style={{ ...styles.td, fontWeight: '600', color: '#0369a1' }}>
+                                {itemData.tkNo ? `${itemData.tkNo}${itemData.etc ? ` (${itemData.etc})` : ''}` : '-'}
+                              </td>
                               <td style={styles.td}>{itemData.item}</td>
                               <td style={styles.td}>{itemData.date}</td>
                               <td style={styles.td}>
@@ -759,7 +767,9 @@ function App() {
                                   onClick={() => handleCardClick(itemData)}
                                 >
                                   <div style={{ ...styles.cardVendor, color: vStyle.text }}>{itemData.vendor}</div>
-                                  <div style={styles.cardDetail}>[{itemData.project}] {itemData.shipNo} {itemData.tkNo && `(TK No.: ${itemData.tkNo})`}</div>
+                                  <div style={styles.cardDetail}>
+                                    [{itemData.project}] {itemData.shipNo}{itemData.tkNo ? ` ${itemData.tkNo}` : ''}{itemData.etc ? ` (${itemData.etc})` : ''}
+                                  </div>
                                   <div style={styles.cardItemName}>{itemData.item}</div>
                                 </div>
                               );
@@ -799,7 +809,7 @@ function App() {
         </div>
       )}
 
-      {/* 등록 모달 */}
+      {/* 등록 모달 (순서: 프로젝트 -> 호선번호 -> 아이템 -> TK No. -> 기타 -> 날짜) */}
       {showRegisterModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalCard}>
@@ -827,17 +837,27 @@ function App() {
                 </select>
               </div>
               <div style={{ marginBottom: '14px' }}>
+                <label style={styles.labelStyle}>아이템 (검사 항목)</label>
+                <select value={item} onChange={(e) => setItem(e.target.value)} style={styles.selectInput} required>
+                  <option value="">-- 선택 --</option>
+                  {items.map((i) => (<option key={i} value={i}>{i}</option>))}
+                </select>
+              </div>
+              <div style={{ marginBottom: '14px' }}>
                 <label style={styles.labelStyle}>TK No.</label>
                 <select value={tkNo} onChange={(e) => setTkNo(e.target.value)} style={styles.selectInput} required>
                   {tkOptions.map((t) => (<option key={t} value={t}>{t}</option>))}
                 </select>
               </div>
               <div style={{ marginBottom: '14px' }}>
-                <label style={styles.labelStyle}>아이템 (검사 항목)</label>
-                <select value={item} onChange={(e) => setItem(e.target.value)} style={styles.selectInput} required>
-                  <option value="">-- 선택 --</option>
-                  {items.map((i) => (<option key={i} value={i}>{i}</option>))}
-                </select>
+                <label style={styles.labelStyle}>기타 (선택 입력)</label>
+                <input 
+                  type="text" 
+                  value={etc} 
+                  onChange={(e) => setEtc(e.target.value)} 
+                  placeholder="예: 추가 내용 입력" 
+                  style={styles.selectInput} 
+                />
               </div>
               <div style={{ marginBottom: '20px' }}>
                 <label style={styles.labelStyle}>날짜 <span style={{ color: 'red' }}>*</span></label>
@@ -852,7 +872,7 @@ function App() {
         </div>
       )}
 
-      {/* 수정 모달 */}
+      {/* 수정 모달 (순서: 프로젝트 -> 호선번호 -> 아이템 -> TK No. -> 기타 -> 날짜) */}
       {showEditModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalCard}>
@@ -880,17 +900,27 @@ function App() {
                 </select>
               </div>
               <div style={{ marginBottom: '14px' }}>
+                <label style={styles.labelStyle}>아이템 (검사 항목)</label>
+                <select value={item} onChange={(e) => setItem(e.target.value)} style={styles.selectInput} required>
+                  <option value="">-- 선택 --</option>
+                  {items.map((i) => (<option key={i} value={i}>{i}</option>))}
+                </select>
+              </div>
+              <div style={{ marginBottom: '14px' }}>
                 <label style={styles.labelStyle}>TK No.</label>
                 <select value={tkNo} onChange={(e) => setTkNo(e.target.value)} style={styles.selectInput} required>
                   {tkOptions.map((t) => (<option key={t} value={t}>{t}</option>))}
                 </select>
               </div>
               <div style={{ marginBottom: '14px' }}>
-                <label style={styles.labelStyle}>아이템 (검사 항목)</label>
-                <select value={item} onChange={(e) => setItem(e.target.value)} style={styles.selectInput} required>
-                  <option value="">-- 선택 --</option>
-                  {items.map((i) => (<option key={i} value={i}>{i}</option>))}
-                </select>
+                <label style={styles.labelStyle}>기타 (선택 입력)</label>
+                <input 
+                  type="text" 
+                  value={etc} 
+                  onChange={(e) => setEtc(e.target.value)} 
+                  placeholder="예: 추가 내용 입력" 
+                  style={styles.selectInput} 
+                />
               </div>
               <div style={{ marginBottom: '20px' }}>
                 <label style={styles.labelStyle}>날짜 <span style={{ color: 'red' }}>*</span></label>
@@ -912,8 +942,8 @@ const styles = {
   landingContainer: { 
     display: 'flex', 
     flexDirection: 'column',
-    justifyContent: 'center', // 세로 중앙
-    alignItems: 'center',     // 가로 중앙
+    justifyContent: 'center', 
+    alignItems: 'center',     
     width: '100vw', 
     height: '100vh', 
     backgroundColor: '#234e38', 
@@ -921,22 +951,21 @@ const styles = {
     fontFamily: "'Segoe UI', Roboto, sans-serif", 
     textAlign: 'center',
     position: 'fixed',
-    top: 0,                   // 뷰포트 상단 밀착
-    left: 0,                  // 뷰포트 좌측 밀착
+    top: 0,                     
+    left: 0,                    
     zIndex: 9999
   },
-contentBox: { 
+  contentBox: { 
     display: 'flex', 
     flexDirection: 'column', 
-    alignItems: 'center',       // 내부 요소 가로 중앙 정렬
-    justifyContent: 'center',  // 내부 요소 세로 중앙 정렬
+    alignItems: 'center',       
+    justifyContent: 'center',  
     textAlign: 'center', 
     width: '100%', 
     maxWidth: '500px', 
     padding: '0 20px', 
     boxSizing: 'border-box'
   },
-
   hdLogo: { 
     fontSize: '3.8rem', 
     fontWeight: '800', 
@@ -948,7 +977,7 @@ contentBox: {
   subText: { 
     fontSize: '0.75rem', 
     letterSpacing: '3px', 
-    color: 'rgba(255, 255, 255, 0.55)', // 글자색을 은은하고 연하게 조정
+    color: 'rgba(255, 255, 255, 0.55)', 
     marginTop: '12px', 
     marginBottom: '28px', 
     fontWeight: '600' 
@@ -956,7 +985,7 @@ contentBox: {
   description: { 
     fontSize: '0.95rem', 
     lineHeight: '1.6', 
-    color: 'rgba(255, 255, 255, 0.65)', // 중앙 본문 텍스트 톤다운
+    color: 'rgba(255, 255, 255, 0.65)', 
     margin: '0 0 32px 0' 
   },
   enterButton: { 
@@ -972,47 +1001,39 @@ contentBox: {
   footer: { 
     marginTop: '40px', 
     fontSize: '0.75rem', 
-    color: 'rgba(255, 255, 255, 0.35)', // 하단 풋터 글자색 연하게 
+    color: 'rgba(255, 255, 255, 0.35)',  
     lineHeight: '1.5'
   },
-
   mainLayout: { display: 'flex', width: '100vw', height: '100vh', backgroundColor: '#f3f4f6', fontFamily: "'Segoe UI', Roboto, sans-serif" },
   sidebar: { width: '240px', backgroundColor: '#1b4332', color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '20px 16px' },
   sidebarLogoBox: { borderBottom: '1px solid rgba(255, 255, 255, 0.15)', paddingBottom: '16px' },
   navMenu: { marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px' },
   navItem: { padding: '10px 12px', borderRadius: '6px', fontSize: '0.9rem', cursor: 'pointer', color: '#e2e8e4' },
   sidebarSummary: { backgroundColor: 'rgba(0, 0, 0, 0.2)', padding: '12px 14px', borderRadius: '6px', border: '1px solid rgba(255, 255, 255, 0.08)' },
-
   contentArea: { flex: 1, display: 'flex', flexDirection: 'column', padding: '20px', overflowY: 'auto' },
   topHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff', padding: '16px 20px', borderRadius: '8px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' },
   primaryBtn: { backgroundColor: '#1b4332', color: '#fff', border: 'none', padding: '8px 18px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.95rem' },
   excelBtn: { backgroundColor: '#10b981', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.85rem' },
   pdfBtn: { backgroundColor: '#ef4444', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.85rem' },
-
   bodyGrid: { display: 'flex', gap: '16px', flex: 1 },
   vendorPanel: { width: '200px', backgroundColor: '#fff', borderRadius: '8px', padding: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', height: 'fit-content' },
-
   adminStatsRow: { display: 'flex', gap: '16px' },
   statCard: { backgroundColor: '#fff', borderRadius: '8px', padding: '16px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' },
   statNumber: { fontSize: '1.8rem', fontWeight: 'bold', color: '#1b4332' },
   statLabel: { fontSize: '0.85rem', color: '#6b7280', marginTop: '4px' },
-
   progressCard: { backgroundColor: '#fff', borderRadius: '8px', padding: '16px 20px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' },
   noticeBar: { backgroundColor: '#fffbe8', border: '1px solid #fef3c7', padding: '12px 16px', borderRadius: '8px', fontSize: '0.88rem' },
   calendarCard: { backgroundColor: '#fff', borderRadius: '8px', padding: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', minHeight: '380px' },
   weekHeader: { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' },
   arrowBtn: { border: '1px solid #d1d5db', backgroundColor: '#fff', borderRadius: '4px', padding: '4px 10px', cursor: 'pointer' },
-
   calendarGrid: { display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', flex: 1, border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden' },
   dayColumn: { backgroundColor: '#fafafa', display: 'flex', flexDirection: 'column', borderRight: '1px solid #e5e7eb' },
   dayHeader: { padding: '8px', backgroundColor: '#fff', borderBottom: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' },
   dayBody: { padding: '6px', flex: 1, display: 'flex', flexDirection: 'column', gap: '6px', overflowY: 'auto' },
-
   inspectionCard: { borderRadius: '4px', padding: '6px 8px', fontSize: '0.8rem', cursor: 'pointer', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' },
   cardVendor: { fontWeight: 'bold', fontSize: '0.75rem' },
   cardDetail: { color: '#4b5563', fontSize: '0.75rem', marginTop: '2px' },
   cardItemName: { color: '#1f2937', fontWeight: 'bold', marginTop: '2px' },
-
   listCard: { backgroundColor: '#fff', borderRadius: '8px', padding: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', marginTop: '8px' },
   listHeaderTitle: { fontSize: '0.95rem', fontWeight: 'bold', color: '#374151', marginBottom: '14px' },
   table: { width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' },
@@ -1022,8 +1043,7 @@ contentBox: {
   td: { padding: '10px 12px', color: '#4b5563' },
   tableEditBtn: { border: '1px solid #6366f1', color: '#4f46e5', backgroundColor: '#f5f3ff', borderRadius: '4px', padding: '3px 8px', fontSize: '0.75rem', cursor: 'pointer' },
   tableDeleteBtn: { border: '1px solid #fca5a5', color: '#dc2626', backgroundColor: '#fef2f2', borderRadius: '4px', padding: '3px 8px', fontSize: '0.75rem', cursor: 'pointer' },
-
-  modalOverlay: {position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 },
+  modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 },
   modalCard: { backgroundColor: '#fff', width: '380px', borderRadius: '8px', padding: '20px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #eee', paddingBottom: '10px' },
   closeBtn: { background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#666' },
